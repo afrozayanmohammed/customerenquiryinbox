@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Enquiry Inbox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-light: #111827;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --warning: #facc15;
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #1f2937, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      background: linear-gradient(135deg, #020617 0%, #020617 40%, #0b1120);
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 20%, #38bdf8, #0ea5e9);
+      box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.25);
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      letter-spacing: 0.03em;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    h1 span {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .mode-toggle {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      padding: 4px;
+      display: inline-flex;
+      border: 1px solid rgba(100, 116, 139, 0.6);
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+
+    .mode-btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .mode-btn.active {
+      background: radial-gradient(circle at top left, #38bdf8, #0ea5e9);
+      color: #0b1120;
+      font-weight: 600;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .panel {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: radial-gradient(
+          circle at top left,
+          rgba(56, 189, 248, 0.05),
+          transparent 45%
+        ),
+        linear-gradient(to bottom, #020617, #020617);
+      padding: 18px 18px 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .panel-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .panel-header p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .hint-pill {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      color: var(--muted);
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.16s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      max-height: 220px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+
+    .helper {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    button,
+    .badge-btn {
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      margin-top: 4px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      border: none;
+      background: radial-gradient(circle at 20% 0%, #38bdf8, #0ea5e9);
+      color: #020617;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 12px 30px rgba(8, 47, 73, 0.8);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 8px 20px rgba(8, 47, 73, 0.8);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: wait;
+      box-shadow: none;
+    }
+
+    .status-line {
+      font-size: 0.8rem;
+      margin-top: 6px;
+    }
+
+    .status-success {
+      color: var(--success);
+    }
+
+    .status-error {
+      color: var(--danger);
+    }
+
+    .status-neutral {
+      color: var(--muted);
+    }
+
+    /* Inbox */
+    .inbox-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+    }
+
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .filter-btn.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .list {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+
+    .list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .list::-webkit-scrollbar-thumb {
+      background: rgba(75, 85, 99, 0.7);
+      border-radius: 999px;
+    }
+
+    .empty-state {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 28px 10px 24px;
+      text-align: center;
+      border-radius: var(--radius-lg);
+      border: 1px dashed rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .enquiry {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 10px 10px 8px;
+      margin-bottom: 8px;
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.95),
+        rgba(15, 23, 42, 0.8)
+      );
+      display: grid;
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+
+    .enquiry-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .enquiry-name {
+      font-weight: 500;
+    }
+
+    .enquiry-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .badge-status-new {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge-status-contacted {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: rgba(250, 204, 21, 0.06);
+    }
+
+    .badge-status-closed {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(74, 222, 128, 0.06);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+    }
+
+    .badge-dot.new {
+      background: var(--accent);
+    }
+
+    .badge-dot.contacted {
+      background: var(--warning);
+    }
+
+    .badge-dot.closed {
+      background: var(--success);
+    }
+
+    .enquiry-message {
+      margin-top: 2px;
+      line-height: 1.4;
+      color: #e5e7eb;
+    }
+
+    .enquiry-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .actions {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge-btn {
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .badge-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .badge-btn--contacted {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .badge-btn--closed {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .badge-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .staff-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    @media (min-width: 900px) {
+      main {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">
+        <div class="logo-dot"></div>
+        <h1>
+          Customer Enquiry Inbox
+          <span>Firestore demo – public form & staff inbox</span>
+        </h1>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="public">
+          <span class="icon">📝</span> Public Form
+        </button>
+        <button class="mode-btn" data-mode="staff">
+          <span class="icon">📥</span> Staff Inbox
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Public Enquiry Form -->
+      <section class="panel" id="public-panel">
+        <div class="panel-header">
+          <div>
+            <h2>New Enquiry</h2>
+            <p>Customers can send you questions or requests.</p>
+          </div>
+          <div class="hint-pill">
+            Data is stored in Firestore.
+          </div>
+        </div>
+
+        <form id="enquiry-form">
+          <div class="field-row">
+            <div>
+              <label for="name">Full Name</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="e.g. Maria Johnson"
+                required
+              />
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="subject">Subject</label>
+            <input
+              id="subject"
+              type="text"
+              placeholder="e.g. Pricing for enterprise plan"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="message">Message</label>
+            <textarea
+              id="message"
+              placeholder="Briefly describe your question or request..."
+              required
+            ></textarea>
+            <p class="helper">
+              Please avoid sharing passwords or highly sensitive information.
+            </p>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <span>Submit Enquiry</span>
+            <span>➤</span>
+          </button>
+
+          <div id="form-status" class="status-line status-neutral">
+            Fill out the form and submit your enquiry.
+          </div>
+        </form>
+      </section>
+
+      <!-- Staff Inbox -->
+      <section class="panel" id="staff-panel" style="display: none">
+        <div class="panel-header">
+          <div>
+            <h2>Staff Inbox</h2>
+            <p>Track new enquiries and update their status.</p>
+          </div>
+          <div class="hint-pill">
+            In production, lock this behind staff authentication.
+          </div>
+        </div>
+
+        <div class="inbox-controls">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            Live-sync from Firestore (newest first)
+          </div>
+          <div class="filters" id="filter-buttons">
+            <button class="filter-btn active" data-filter="all">
+              All
+            </button>
+            <button class="filter-btn" data-filter="New">New</button>
+            <button class="filter-btn" data-filter="Contacted">
+              Contacted
+            </button>
+            <button class="filter-btn" data-filter="Closed">Closed</button>
+          </div>
+        </div>
+
+        <div class="list" id="enquiry-list">
+          <div class="empty-state">
+            No enquiries yet. When customers submit the form, they will appear
+            here.
+          </div>
+        </div>
+
+        <div class="staff-hint">
+          Tip: Click <strong>Contacted</strong> when you reach out, and
+          <strong>Closed</strong> when the issue is fully resolved.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase + Firestore (Modular v9+) -->
+  <script type="module">
+    // TODO: Replace with your project's Firebase config
+    const firebaseConfig = {
+  apiKey: "AIzaSyAsJ9_ged6lN21BXIoe_Z3ddviDH9IrqOw",
+  authDomain: "customer-enquiry-inbox.firebaseapp.com",
+  projectId: "customer-enquiry-inbox",
+  storageBucket: "customer-enquiry-inbox.firebasestorage.app",
+  messagingSenderId: "205076803540",
+  appId: "1:205076803540:web:56c1204d76a0c5b1563041"
+};
+
+
+    // Firebase imports from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      serverTimestamp,
+      query,
+      orderBy,
+      onSnapshot,
+      updateDoc,
+      doc,
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ----------- UI ELEMENTS ----------
+    const publicPanel = document.getElementById("public-panel");
+    const staffPanel = document.getElementById("staff-panel");
+    const modeButtons = document.querySelectorAll(".mode-btn");
+
+    const enquiryForm = document.getElementById("enquiry-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const formStatus = document.getElementById("form-status");
+
+    const enquiryList = document.getElementById("enquiry-list");
+    const filterButtons = document.querySelectorAll(".filter-btn");
+
+    let currentFilter = "all";
+    let enquiries = [];
+
+    // ----------- VIEW TOGGLE ----------
+    modeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode;
+        modeButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (mode === "public") {
+          publicPanel.style.display = "";
+          staffPanel.style.display = "none";
+        } else {
+          publicPanel.style.display = "none";
+          staffPanel.style.display = "";
+        }
+      });
+    });
+
+    // ----------- FORM SUBMIT ----------
+    enquiryForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      formStatus.textContent = "Submitting your enquiry...";
+      formStatus.className = "status-line status-neutral";
+      submitBtn.disabled = true;
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const subject = document.getElementById("subject").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!name || !email || !subject || !message) {
+        formStatus.textContent = "Please complete all fields.";
+        formStatus.className = "status-line status-error";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const payload = {
+          name,
+          email,
+          subject,
+          message,
+          status: "New",
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        await addDoc(collection(db, "enquiries"), payload);
+
+        enquiryForm.reset();
+        formStatus.textContent =
+          "Enquiry submitted successfully. We'll get back to you soon.";
+        formStatus.className = "status-line status-success";
+      } catch (err) {
+        console.error("Error adding document: ", err);
+        formStatus.textContent =
+          "Something went wrong. Please try again or contact support.";
+        formStatus.className = "status-line status-error";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    // ----------- INBOX LISTENING ----------
+    const enquiriesRef = collection(db, "enquiries");
+    const q = query(enquiriesRef, orderBy("createdAt", "desc"));
+
+    onSnapshot(
+      q,
+      (snapshot) => {
+        enquiries = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }));
+        renderEnquiries();
+      },
+      (error) => {
+        console.error("Error listening to enquiries:", error);
+        enquiryList.innerHTML =
+          '<div class="empty-state">Unable to load enquiries. Check your Firestore rules and network connection.</div>';
+      }
+    );
+
+    // ----------- FILTERS ----------
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        renderEnquiries();
+      });
+    });
+
+    // ----------- RENDER ENQUIRIES ----------
+    function renderEnquiries() {
+      const filtered =
+        currentFilter === "all"
+          ? enquiries
+          : enquiries.filter((e) => (e.status || "New") === currentFilter);
+
+      if (!filtered.length) {
+        enquiryList.innerHTML =
+          '<div class="empty-state">No enquiries found for this filter.</div>';
+        return;
+      }
+
+      enquiryList.innerHTML = "";
+      filtered.forEach((e) => {
+        const card = document.createElement("div");
+        card.className = "enquiry";
+
+        const status = e.status || "New";
+        const createdAt = formatTimestamp(e.createdAt);
+        const updatedAt = formatTimestamp(e.updatedAt);
+
+        const badgeClass =
+          status === "Closed"
+            ? "badge-status-closed"
+            : status === "Contacted"
+            ? "badge-status-contacted"
+            : "badge-status-new";
+
+        const dotClass =
+          status === "Closed"
+            ? "closed"
+            : status === "Contacted"
+            ? "contacted"
+            : "new";
+
+        card.innerHTML = `
+          <div class="enquiry-header">
+            <div>
+              <div class="enquiry-name">${escapeHtml(e.name || "Unknown")}</div>
+              <div class="enquiry-meta">
+                <span>${escapeHtml(e.email || "")}</span>
+                <span>•</span>
+                <span>${createdAt}</span>
+              </div>
+            </div>
+            <div class="badge ${badgeClass}">
+              <span class="badge-dot ${dotClass}"></span>
+              <span>${status}</span>
+            </div>
+          </div>
+          <div class="enquiry-meta">
+            <strong>Subject:</strong>
+            <span>${escapeHtml(e.subject || "")}</span>
+          </div>
+          <div class="enquiry-message">
+            ${escapeHtml(e.message || "")}
+          </div>
+          <div class="enquiry-footer">
+            <div class="enquiry-meta">
+              <span>Updated: ${updatedAt}</span>
+            </div>
+            <div class="actions">
+              <button class="badge-btn badge-btn--contacted" data-action="Contacted">
+                ☎ Contacted
+              </button>
+              <button class="badge-btn badge-btn--closed" data-action="Closed">
+                ✅ Closed
+              </button>
+            </div>
+          </div>
+        `;
+
+        const contactedBtn = card.querySelector(
+          'button[data-action="Contacted"]'
+        );
+        const closedBtn = card.querySelector('button[data-action="Closed"]');
+
+        contactedBtn.addEventListener("click", () =>
+          updateStatus(e.id, "Contacted", contactedBtn, closedBtn)
+        );
+        closedBtn.addEventListener("click", () =>
+          updateStatus(e.id, "Closed", contactedBtn, closedBtn)
+        );
+
+        enquiryList.appendChild(card);
+      });
+    }
+
+    async function updateStatus(id, newStatus, contactedBtn, closedBtn) {
+      try {
+        contactedBtn.disabled = true;
+        closedBtn.disabled = true;
+
+        await updateDoc(doc(db, "enquiries", id), {
+          status: newStatus,
+          updatedAt: serverTimestamp(),
+        });
+      } catch (err) {
+        console.error("Error updating status:", err);
+        alert("Unable to update status. Check console for details.");
+      } finally {
+        contactedBtn.disabled = false;
+        closedBtn.disabled = false;
+      }
+    }
+
+    // ----------- UTILITIES ----------
+    function formatTimestamp(ts) {
+      if (!ts || !ts.toDate) return "—";
+      const d = ts.toDate();
+      const date = d.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      const time = d.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return `${date} · ${time}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
